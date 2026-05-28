@@ -7,9 +7,33 @@ $user_id = $_SESSION['user_id'];
 
 // 1. Suma wydatków w tym miesiącu
 $currentMonth = date('Y-m');
-$stmt = $db->prepare("SELECT SUM(amount) as total FROM expenses WHERE user_id = ? AND date LIKE ?");
+
+$stmt = $db->prepare("
+SELECT SUM(amount) as total
+FROM expenses
+WHERE user_id = ?
+AND date LIKE ?
+");
+
 $stmt->execute([$user_id, "$currentMonth%"]);
+
 $totalMonth = $stmt->fetch()['total'] ?? 0;
+
+// 2. Suma przychodów
+$stmt = $db->prepare("
+SELECT SUM(amount) as total_income
+FROM incomes
+WHERE user_id = ?
+AND date LIKE ?
+");
+
+$stmt->execute([$user_id, "$currentMonth%"]);
+
+$totalIncome = $stmt->fetch()['total_income'] ?? 0;
+
+// 3. Bilans
+$balance = $totalIncome - $totalMonth;
+
 
 // 2. Ostatnie 5 transakcji
 $stmt = $db->prepare("SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC, id DESC LIMIT 5");
@@ -43,17 +67,19 @@ $budgets = $stmt->fetchAll();
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard</title>
+    <title>Panel główny</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-light">
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
     <div class="container">
-        <a class="navbar-brand" href="dashboard.php">💰 Portfel (Witaj, <?= htmlspecialchars($_SESSION['username']) ?>)</a>
+        <a class="navbar-brand" href="dashboard.php">Twój portfel (Witaj, <?= htmlspecialchars($_SESSION['username']) ?>)</a>
         <div class="navbar-nav">
-            <a class="nav-link active" href="dashboard.php">Dashboard</a>
+            <a class="nav-link active" href="dashboard.php">Panel główny</a>
             <a class="nav-link" href="expenses.php">Wydatki</a>
+            <a class="nav-link" href="income.php">Przychody</a>
             <a class="nav-link" href="budgets.php">Budżety</a>
             <a class="nav-link text-danger" href="logout.php">Wyloguj</a>
         </div>
@@ -61,15 +87,34 @@ $budgets = $stmt->fetchAll();
 </nav>
 
 <div class="container">
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card bg-primary text-white p-4 text-center">
-                <h3>Wydano w tym miesiącu:</h3>
-                <h2><?= number_format($totalMonth, 2, ',', ' ') ?> zł</h2>
-            </div>
-        </div>
-        <div class="col-md-8">
-            <div class="card p-3">
+<div class="row">   
+<div class="col-md-4">
+<div class="card <?= $balance >= 0 ? 'bg-success' : 'bg-danger' ?> text-white p-4 text-center">
+
+    <h3>Bilans miesiąca</h3>
+
+    <h2>
+        <?= number_format($balance, 2, ',', ' ') ?> zł
+    </h2>
+
+    <p class="mt-2 mb-0">
+        Przychody:
+        <strong>
+            <?= number_format($totalIncome, 2, ',', ' ') ?> zł
+        </strong>
+    </p>
+
+    <p class="mb-0">
+        Wydatki:
+        <strong>
+            <?= number_format($totalMonth, 2, ',', ' ') ?> zł
+        </strong>
+    </p>
+
+</div> 
+</div>   
+<div class="col-md-8">
+<div class="card p-3">
                 <h5>Stan budżetów</h5>
                 <?php foreach ($budgets as $b): 
                     $pct = $b['amount_limit'] > 0 ? ($b['current_spent'] / $b['amount_limit']) * 100 : 0;
@@ -83,10 +128,13 @@ $budgets = $stmt->fetchAll();
                     </div>
                 <?php endforeach; ?>
             </div>
-        </div>
-    </div>
+</div>   
 
-    <div class="row">
+</div>
+
+</div>
+
+    <div class="row p-3">
         <div class="col-md-6">
             <div class="card p-3 mb-4">
                 <h5>Ostatnie transakcje</h5>

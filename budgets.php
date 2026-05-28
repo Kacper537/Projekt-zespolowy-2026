@@ -34,14 +34,16 @@ $categories = ['Jedzenie', 'Transport', 'Rachunki', 'Rozrywka', 'Studia', 'Inne'
     <meta charset="UTF-8">
     <title>Limity Budżetowe</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-light">
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
     <div class="container">
-        <a class="navbar-brand" href="dashboard.php">💰 Portfel</a>
+        <a class="navbar-brand" href="dashboard.php">Twój portfel (Witaj, <?= htmlspecialchars($_SESSION['username']) ?>)</a>
         <div class="navbar-nav">
-            <a class="nav-link" href="dashboard.php">Dashboard</a>
+            <a class="nav-link" href="dashboard.php">Panel główny</a>
             <a class="nav-link" href="expenses.php">Wydatki</a>
+            <a class="nav-link" href="income.php">Przychody</a>
             <a class="nav-link active" href="budgets.php">Budżety</a>
             <a class="nav-link text-danger" href="logout.php">Wyloguj</a>
         </div>
