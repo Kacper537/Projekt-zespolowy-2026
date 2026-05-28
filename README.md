@@ -1,4 +1,4 @@
-# Projekt-zespoowy-2026
+# Projekt-zespołowy-2026
 
 Skład zespołu:
 - Julia Perz
