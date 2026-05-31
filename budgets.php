@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $limit = floatval($_POST['limit']);
 
     if (!empty($category) && $limit >= 0) {
-        // Składnia INSERT OR REPLACE (unikalne dla SQLite, nadpisuje rekord jeśli kategoria już istnieje)
+        // Składnia INSERT OR REPLACE (unikalne dla MySQL, nadpisuje rekord jeśli kategoria już istnieje)
         $stmt = $db->prepare("INSERT INTO budgets (user_id, category, amount_limit) 
                       VALUES (?, ?, ?) 
                       ON DUPLICATE KEY UPDATE amount_limit = VALUES(amount_limit)");

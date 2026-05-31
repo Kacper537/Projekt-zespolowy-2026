@@ -308,3 +308,6 @@ RESPONSIVE
     width: 100%;
 }
 
+canvas {
+    max-height: 300px;
+}
